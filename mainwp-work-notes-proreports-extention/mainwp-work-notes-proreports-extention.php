@@ -3,13 +3,14 @@
 Plugin Name: MainWP Client Notes Pro Report Extension
 Plugin URI: https://github.com/stingray82
 Description: This adds client notes to your pro report
-Version: 1.0
+Version: 1.1
 Author: Stingray83
 Author URI: https://https://github.com/stingray82
 Icon URI:
 */
 include_once 'mainwp-work-notes.php';
 class MainWP_Client_Notes_Proreport_Extension {
+	
 
 
 	public function __construct() {

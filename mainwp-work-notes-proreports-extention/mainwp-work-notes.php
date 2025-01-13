@@ -129,6 +129,7 @@ class MainWP_Work_Notes {
 
     // Renders the actual content of the Work Notes page
     public static function render() {
+        do_action('mainwp_pageheader_sites');
         $current_wpid = MainWP_System_Utility::get_current_wpid();
         if (!MainWP_Utility::ctype_digit($current_wpid)) {
             return;
@@ -139,7 +140,7 @@ class MainWP_Work_Notes {
         $notes = get_option($notes_key, array());
 
         // Display the entire Work Notes section inside a container div
-echo '<div id="mainwp_tab_WorkNotes_container">';
+echo '<div id="mainwp_tab_WorkNotes_container" class="ui segment">';
 
     // Display the form to add/edit a note
     echo '<form id="work-notes-form" class="ui form" style="padding: 20px; max-width: 95%; margin: 0 auto;">';
@@ -173,6 +174,7 @@ echo '<div id="mainwp_tab_WorkNotes_container">';
     echo '</tbody></table>';
 
 echo '</div>';  // Close the container div
+do_action('mainwp_pagefooter_sites');
 
     }
 }
