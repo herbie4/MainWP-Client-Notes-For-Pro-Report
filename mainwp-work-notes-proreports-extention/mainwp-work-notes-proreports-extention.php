@@ -1,13 +1,19 @@
 <?php
-/*
-Plugin Name: MainWP Client Notes Pro Report Extension
-Plugin URI: https://github.com/stingray82
-Description: This adds client notes to your pro report
-Version: 1.1
-Author: Stingray83
-Author URI: https://https://github.com/stingray82
-Icon URI:
-*/
+/**
+ * Plugin Name:       MainWP Client Notes Pro Report Extension
+ * Tested up to:      6.7.2
+ * Description:       This adds client notes to your pro report
+ * Requires at least: 6.5
+ * Requires PHP:      7.4
+ * Version:           1.1
+ * Author:            reallyusefulplugins.com
+ * Author URI:        https://reallyusefulplugins.com
+ * License:           GPL-2.0-or-later
+ * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
+ * Text Domain:       mainwp-client-notes-pro-reports-extention
+ * Website:           https://reallyusefulplugins.com
+ * */
+
 include_once 'mainwp-work-notes.php';
 class MainWP_Client_Notes_Proreport_Extension {
 	
