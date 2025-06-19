@@ -1,7 +1,7 @@
 {
     "slug": "MainWP-Client-Notes-For-Pro-Report",
     "name": "MainWP Client Notes Pro Report Extension",
-    "version": "1.1.5",
+    "version": "1.1.5.1",
     "author": "reallyusefulplugins.com",
     "author_homepage": "https://reallyusefulplugins.com",
     "requires_php": "7.4",
@@ -13,7 +13,7 @@
         "frequently_asked_questions": "",
         "changelog": "<li>1.11 - V1.2 - Added automatic updates using GitHub to the plugin (Experimental)</li><li>Over the next week or so this will slowly increase to V1.2 as I test a new deploy script and updater for GitHub repos.</li>"
     },
-    "last_updated": "2025-06-19 18:53:01",
+    "last_updated": "2025-06-19 18:57:15",
     "download_url": "https://github.com/stingray82/MainWP-Client-Notes-For-Pro-Report/releases/latest/download/mainwp-work-notes-proreports-extention.zip",
     "banners": {
         "low": "https://raw.githubusercontent.com/stingray82/MainWP-Client-Notes-For-Pro-Report/main/uupd/banner-772x250.png",
