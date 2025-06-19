@@ -5,7 +5,7 @@
  * Tested up to:      6.8.1
  * Requires at least: 6.5
  * Requires PHP:      7.4
- * Version:           1.1.3
+ * Version:           1.1.4
  * Author:            reallyusefulplugins.com
  * Author URI:        https://reallyusefulplugins.com
  * License:           GPL-2.0-or-later
@@ -213,7 +213,7 @@ global $mainwpclientnotesproreportExtensionActivator;
 $mainwpclientnotesproreportExtensionActivator = new MainWP_Client_Pro_Report_Notes_Activator();
 
 // Define plugin constants
-define('RUP_MAINWP_CLIENT_NOTES_VERSION', '1.1.3');
+define('RUP_MAINWP_CLIENT_NOTES_VERSION', '1.1.4');
 
 // ──────────────────────────────────────────────────────────────────────────
 //  Updater bootstrap (plugins_loaded priority 1):
@@ -227,8 +227,8 @@ add_action( 'plugins_loaded', function() {
     $updater_config = [
         'plugin_file' => plugin_basename( __FILE__ ),             // e.g. "simply-static-export-notify/simply-static-export-notify.php"
         'slug'        => 'mainwp-client-notes-pro-reports-extention',           // must match your updater‐server slug
-        'name'        => 'RUP_MAINWP_CLIENT_NOTES_VERSION',         // human‐readable plugin name
-        'version'     => RUP_MAINWP_CLF_BRIDGE_VERSION, // same as the VERSION constant above
+        'name'        => 'MainWP Client Notes Pro Report Extension',         // human‐readable plugin name
+        'version'     => RUP_MAINWP_CLIENT_NOTES_VERSION, // same as the VERSION constant above
         'key'         => '',                 // your secret key for private updater
         'server'      => 'https://raw.githubusercontent.com/stingray82/MainWP-Client-Notes-For-Pro-Report/main/uupd/index.json',
     ];
