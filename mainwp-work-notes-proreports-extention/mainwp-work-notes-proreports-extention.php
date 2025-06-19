@@ -1,18 +1,18 @@
 <?php
 /**
  * Plugin Name:       MainWP Client Notes Pro Report Extension
- * Tested up to:      6.7.2
  * Description:       This adds client notes to your pro report
+ * Tested up to:      6.8.1
  * Requires at least: 6.5
  * Requires PHP:      7.4
- * Version:           1.1
+ * Version:           1.1.1
  * Author:            reallyusefulplugins.com
  * Author URI:        https://reallyusefulplugins.com
  * License:           GPL-2.0-or-later
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain:       mainwp-client-notes-pro-reports-extention
  * Website:           https://reallyusefulplugins.com
- * */
+ */
 
 include_once 'mainwp-work-notes.php';
 class MainWP_Client_Notes_Proreport_Extension {
@@ -212,3 +212,27 @@ class MainWP_Client_Pro_Report_Notes_Activator {
 global $mainwpclientnotesproreportExtensionActivator;
 $mainwpclientnotesproreportExtensionActivator = new MainWP_Client_Pro_Report_Notes_Activator();
 
+// Define plugin constants
+define('RUP_MAINWP_CLIENT_NOTES_VERSION', '1.1.1');
+
+// ──────────────────────────────────────────────────────────────────────────
+//  Updater bootstrap (plugins_loaded priority 1):
+// ──────────────────────────────────────────────────────────────────────────
+add_action( 'plugins_loaded', function() {
+    // 1) Load our universal drop-in. Because that file begins with "namespace UUPD\V1;",
+    //    both the class and the helper live under UUPD\V1.
+    require_once __DIR__ . '/inc/updater.php';
+
+    // 2) Build a single $updater_config array:
+    $updater_config = [
+        'plugin_file' => plugin_basename( __FILE__ ),             // e.g. "simply-static-export-notify/simply-static-export-notify.php"
+        'slug'        => 'mainwp-client-notes-pro-reports-extention',           // must match your updater‐server slug
+        'name'        => 'RUP_MAINWP_CLIENT_NOTES_VERSION',         // human‐readable plugin name
+        'version'     => RUP_MAINWP_CLF_BRIDGE_VERSION, // same as the VERSION constant above
+        'key'         => '',                 // your secret key for private updater
+        'server'      => 'https://raw.githubusercontent.com/stingray82/MainWP-Client-Notes-For-Pro-Report/main/uupd/index.json',
+    ];
+
+    // 3) Call the helper in the UUPD\V1 namespace:
+    \UUPD\V1\UUPD_Updater_V1::register( $updater_config );
+}, 1 );
