@@ -34,7 +34,7 @@ class MainWP_Work_Notes {
             'title' => 'Work Notes',
             'slug'  => 'WorkNotes',
             'sitetab'  => true,  // This allows it to render in the right panel
-            'menu_hidden' => true,            
+            'menu_hidden' => true,
             'callback' => array(__CLASS__, 'render'),
         );
         return $subArray;
@@ -186,6 +186,18 @@ class MainWP_Work_Notes_Pro_Reports {
     public static function init() {
         // Hook into Pro Reports to add custom tokens
         add_filter('mainwp_pro_reports_custom_tokens', array(__CLASS__, 'generate_work_notes_tokens'), 10, 4);
+        // Hook into client reports pre 4.0.15
+        //add_filter('mainwp_client_reports_generate_report_content', array(__CLASS__, 'generate_work_notes_tokens'), 10, 4);
+
+        // added: Hook into client reports pre 4.0.15
+        add_filter('mainwp_client_reports_custom_tokens', array(__CLASS__, 'client_reports_custom_tokens'), 10, 3);
+    }
+
+    public static function client_reports_custom_tokens($tokensValues, $report, $site) {
+      // get the custom token value
+      $tokensValues['[client.customwork.notes]'] = self::generate_work_notes_tokens($tokensValues, $report, $site, $templ_email);
+
+      return $tokensValues['[client.customwork.notes]'];
     }
 
     // Generate the custom token for work notes
@@ -214,11 +226,11 @@ class MainWP_Work_Notes_Pro_Reports {
 
         // If no work notes are found, return a default message
         if (empty($work_notes)) {
-            $tokensValues['[client.customwork.notes]'] = 'No work notes found within the selected date range.';
+            $tokensValues['[client.customwork.notes]'] = __('No work notes found within the selected date range.','mainwp-client-notes-pro-reports-extention');
         } else {
             // Build a table of work notes
             $output = '<table style="width: 100%; border-collapse: collapse;" border="1">';
-            $output .= '<thead><tr><th>Date</th><th>Work Details</th></tr></thead>';
+            $output .= '<thead><tr><th>'.__('Date', 'mainwp-client-notes-pro-reports-extention').'</th><th>'.__('Work Details', 'mainwp-client-notes-pro-reports-extention').'</th></tr></thead>';
             $output .= '<tbody>';
             foreach ($work_notes as $note) {
                 $output .= '<tr>';
@@ -260,5 +272,3 @@ class MainWP_Work_Notes_Pro_Reports {
 
 // Initialize the Pro Reports integration for Work Notes
 MainWP_Work_Notes_Pro_Reports::init();
-
-

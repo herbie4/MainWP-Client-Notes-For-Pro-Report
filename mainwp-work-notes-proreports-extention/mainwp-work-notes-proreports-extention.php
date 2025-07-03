@@ -5,7 +5,7 @@
  * Tested up to:      6.8.1
  * Requires at least: 6.5
  * Requires PHP:      7.4
- * Version:           1.2
+ * Version:           1.2.1
  * Author:            reallyusefulplugins.com
  * Author URI:        https://reallyusefulplugins.com
  * License:           GPL-2.0-or-later
@@ -16,12 +16,20 @@
 
 include_once 'mainwp-work-notes.php';
 class MainWP_Client_Notes_Proreport_Extension {
-	
+
 
 
 	public function __construct() {
 		//add_filter( 'mainwp_getsubpages_sites', array( &$this, 'managesites_subpage' ), 10, 1 );
         add_action( 'admin_init', array( &$this, 'admin_init' ) );
+				// load textdomain
+				add_action( 'plugins_loaded', array( &$this,'load_textdomain'));
+	}
+
+	// Load plugin textdomain
+	// ---------------
+	public function load_textdomain() {
+		load_plugin_textdomain( 'mainwp-client-notes-pro-reports-extention', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
 	}
 
 	// AJAX handler to load the Work Notes form in the sitetab
@@ -44,7 +52,7 @@ public function load_work_notes_form() {
             <textarea name="work_notes_content" required></textarea>
             <button type="submit" class="ui button green">Save Note</button>
         </form>
-        
+
         <h3>Existing Work Notes</h3>
         <table class="ui celled table">
             <thead><tr><th>Date</th><th>Content</th><th>Actions</th></tr></thead>
@@ -73,7 +81,7 @@ public function load_work_notes_form() {
 
 
     public function admin_init() {
-        
+
     }
 
 	public function managesites_subpage( $subPage ) {
@@ -121,7 +129,7 @@ public function load_work_notes_form() {
 }
 
 
-	
+
 
 /*
 * Activator Class is used for extension activation and deactivation
@@ -213,7 +221,7 @@ global $mainwpclientnotesproreportExtensionActivator;
 $mainwpclientnotesproreportExtensionActivator = new MainWP_Client_Pro_Report_Notes_Activator();
 
 // Define plugin constants
-define('RUP_MAINWP_CLIENT_NOTES_VERSION', '1.2');
+define('RUP_MAINWP_CLIENT_NOTES_VERSION', '1.2.1');
 
 // ──────────────────────────────────────────────────────────────────────────
 //  Updater bootstrap (plugins_loaded priority 1):
