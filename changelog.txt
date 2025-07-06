@@ -1,3 +1,4 @@
+1.22 - Scoped UUPD to make it unique to my plugins
 1.21 - added language support on the notes display stable
 added: dutch translation
 added: support for client report extension < 4.0.15, needs the manual adding the token in client report admin
