@@ -1,7 +1,7 @@
 {
     "slug": "MainWP-Client-Notes-For-Pro-Report",
     "name": "MainWP Client Notes Pro Report Extension",
-    "version": "1.2.1",
+    "version": "1.2.2",
     "author": "reallyusefulplugins.com",
     "author_homepage": "https://reallyusefulplugins.com",
     "requires_php": "7.4",
@@ -13,7 +13,7 @@
         "frequently_asked_questions": "",
         "changelog": "<li>1.21 - added language support on the notes display stable</li><li>added: dutch translation</li><li>added: support for client report extension &lt; 4.0.15, needs the manual adding the token in client report admin</li><li>1.11 - V1.2 - Added automatic updates using GitHub to the plugin (Experimental)</li><li>Over the next week or so this will slowly increase to V1.2 as I test a new deploy script and updater for GitHub repos.</li>"
     },
-    "last_updated": "2025-07-03 18:33:54",
+    "last_updated": "2025-07-06 17:48:48",
     "download_url": "https://github.com/stingray82/MainWP-Client-Notes-For-Pro-Report/releases/latest/download/mainwp-work-notes-proreports-extention.zip",
     "banners": {
         "low": "https://raw.githubusercontent.com/stingray82/MainWP-Client-Notes-For-Pro-Report/main/uupd/banner-772x250.png",

@@ -4,7 +4,7 @@ Donate link: https://reallyusefulplugins.com/donate
 Tags: MainWP, ClientNotes, Pro-report
 Requires at least: 6.5
 Tested up to: 6.8.1
-Stable tag: 1.2
+Stable tag: 1.2.1
 Requires PHP: 7.4
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -23,6 +23,8 @@ Install on your dashboard and it will allow you to pull data from Cloudflare for
 == Frequently Asked Questions ==
  
 == Changelog == 
+1.21 - added language support on the notes display stable
+added: dutch translation
+added: support for client report extension < 4.0.15, needs the manual adding the token in client report admin
 1.11 - V1.2 - Added automatic updates using GitHub to the plugin (Experimental)
 Over the next week or so this will slowly increase to V1.2 as I test a new deploy script and updater for GitHub repos.
-

@@ -5,7 +5,7 @@
  * Tested up to:      6.8.1
  * Requires at least: 6.5
  * Requires PHP:      7.4
- * Version:           1.2.1
+ * Version:           1.2.2
  * Author:            reallyusefulplugins.com
  * Author URI:        https://reallyusefulplugins.com
  * License:           GPL-2.0-or-later
@@ -221,7 +221,7 @@ global $mainwpclientnotesproreportExtensionActivator;
 $mainwpclientnotesproreportExtensionActivator = new MainWP_Client_Pro_Report_Notes_Activator();
 
 // Define plugin constants
-define('RUP_MAINWP_CLIENT_NOTES_VERSION', '1.2.1');
+define('RUP_MAINWP_CLIENT_NOTES_VERSION', '1.2.2');
 
 // ──────────────────────────────────────────────────────────────────────────
 //  Updater bootstrap (plugins_loaded priority 1):
@@ -242,5 +242,5 @@ add_action( 'plugins_loaded', function() {
     ];
 
     // 3) Call the helper in the UUPD\V1 namespace:
-    \UUPD\V1\UUPD_Updater_V1::register( $updater_config );
+    \RUP\Updater\Updater_V1::register( $updater_config );
 }, 1 );
