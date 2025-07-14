@@ -164,7 +164,7 @@ echo '<div id="mainwp_tab_WorkNotes_container" class="ui segment">';
     foreach ($notes as $index => $note) {
         echo '<tr>';
         echo '<td>' . esc_html($note['date']) . '</td>';
-        echo '<td>' . esc_html($note['content']) . '</td>';
+        echo '<td>' . nl2br(esc_html($note['content'])) . '</td>';
         echo '<td>
                 <button class="ui button blue edit-note" data-note-id="' . $index . '">Edit</button>
                 <button class="ui button red delete-note" data-note-id="' . $index . '">Delete</button>
@@ -235,7 +235,7 @@ class MainWP_Work_Notes_Pro_Reports {
             foreach ($work_notes as $note) {
                 $output .= '<tr>';
                 $output .= '<td>' . esc_html($note['date']) . '</td>';
-                $output .= '<td>' . esc_html($note['content']) . '</td>';
+                $output .= '<td>' . nl2br(esc_html($note['content'])) . '</td>';
                 $output .= '</tr>';
             }
             $output .= '</tbody></table>';
