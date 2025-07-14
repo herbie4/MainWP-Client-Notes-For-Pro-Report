@@ -4,7 +4,7 @@ Donate link: https://reallyusefulplugins.com/donate
 Tags: MainWP, ClientNotes, Pro-report
 Requires at least: 6.5
 Tested up to: 6.8.1
-Stable tag: 1.2.2
+Stable tag: 1.2.3
 Requires PHP: 7.4
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -23,6 +23,7 @@ Install on your dashboard and it will allow you to pull data from Cloudflare for
 == Frequently Asked Questions ==
  
 == Changelog == 
+1.23 - Update: UUPD - 1.25 & Improved: New Line Removal and Support for </br> - S Najman
 1.22 - Scoped UUPD to make it unique to my plugins
 1.21 - added language support on the notes display stable
 added: dutch translation

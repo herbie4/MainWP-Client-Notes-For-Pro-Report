@@ -23,6 +23,7 @@ Install on your dashboard and it will allow you to pull data from Cloudflare for
 == Frequently Asked Questions ==
  
 == Changelog == 
+1.22 - Scoped UUPD to make it unique to my plugins
 1.21 - added language support on the notes display stable
 added: dutch translation
 added: support for client report extension < 4.0.15, needs the manual adding the token in client report admin

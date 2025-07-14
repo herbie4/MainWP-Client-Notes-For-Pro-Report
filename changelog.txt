@@ -1,3 +1,4 @@
+1.23 - Update: UUPD - 1.25 & Improved: New Line Removal and Support for </br> - S Najman
 1.22 - Scoped UUPD to make it unique to my plugins
 1.21 - added language support on the notes display stable
 added: dutch translation

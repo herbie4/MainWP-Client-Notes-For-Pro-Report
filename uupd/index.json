@@ -1,7 +1,7 @@
 {
     "slug": "MainWP-Client-Notes-For-Pro-Report",
     "name": "MainWP Client Notes Pro Report Extension",
-    "version": "1.2.2",
+    "version": "1.2.3",
     "author": "reallyusefulplugins.com",
     "author_homepage": "https://reallyusefulplugins.com",
     "requires_php": "7.4",
@@ -11,9 +11,9 @@
         "description": "Install on your dashboard and it will allow you to pull data from Cloudflare for your MainWP reports.",
         "installation": "1. Upload the `mainwp-work-notes-proreports-extention` folder to the `/wp-content/plugins/` directory.<br />\r\n2. Activate the plugin through the 'Plugins' menu in WordPress.<br />\r\n3. Configure the plugin settings it is located in the Simply Static Menu",
         "frequently_asked_questions": "",
-        "changelog": "<li>1.22 - Scoped UUPD to make it unique to my plugins</li><li>1.21 - added language support on the notes display stable</li><li>added: dutch translation</li><li>added: support for client report extension &lt; 4.0.15, needs the manual adding the token in client report admin</li><li>1.11 - V1.2 - Added automatic updates using GitHub to the plugin (Experimental)</li><li>Over the next week or so this will slowly increase to V1.2 as I test a new deploy script and updater for GitHub repos.</li>"
+        "changelog": "<li>1.23 - Update: UUPD - 1.25 &amp; Improved: New Line Removal and Support for &lt;/br&gt; - S Najman</li><li>1.22 - Scoped UUPD to make it unique to my plugins</li><li>1.21 - added language support on the notes display stable</li><li>added: dutch translation</li><li>added: support for client report extension &lt; 4.0.15, needs the manual adding the token in client report admin</li><li>1.11 - V1.2 - Added automatic updates using GitHub to the plugin (Experimental)</li><li>Over the next week or so this will slowly increase to V1.2 as I test a new deploy script and updater for GitHub repos.</li>"
     },
-    "last_updated": "2025-07-06 18:58:58",
+    "last_updated": "2025-07-14 05:23:26",
     "download_url": "https://github.com/stingray82/MainWP-Client-Notes-For-Pro-Report/releases/latest/download/mainwp-work-notes-proreports-extention.zip",
     "banners": {
         "low": "https://raw.githubusercontent.com/stingray82/MainWP-Client-Notes-For-Pro-Report/main/uupd/banner-772x250.png",
