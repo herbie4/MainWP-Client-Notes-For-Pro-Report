@@ -6,8 +6,8 @@ msgstr ""
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/mainwp-work-notes-"
 "proreports-extention\n"
 "POT-Creation-Date: 2025-07-02T11:50:05+00:00\n"
-"PO-Revision-Date: 2025-07-02 13:58+0200\n"
-"Last-Translator: \n"
+"PO-Revision-Date: 2025-07-17 13:39+0200\n"
+"Last-Translator: haha! - herbert hoekstra <werk@haha.nl>\n"
 "Language-Team: \n"
 "Language: nl_NL\n"
 "MIME-Version: 1.0\n"
@@ -39,7 +39,7 @@ msgstr ""
 
 #: mainwp-work-notes.php:229
 msgid "No work notes found within the selected date range."
-msgstr "Geen notities gevonden ."
+msgstr "Geen notities."
 
 #: mainwp-work-notes.php:233
 msgid "Date"
