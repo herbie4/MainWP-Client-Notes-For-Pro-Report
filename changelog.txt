@@ -1,3 +1,8 @@
+1.2.4 
+- Added support for editing Work Notes using the WordPress visual editor (TinyMCE), enabling rich text formatting.
+- Notes are now stored and displayed with HTML formatting, preserving line breaks, styling, and structure.
+- Improved note editing logic to ensure existing notes (including index 0) are correctly updated instead of creating duplicates in HTML editor
+- Update Plugin Description
 1.23 - Update: UUPD - 1.25 & Improved: New Line Removal and Support for </br> - S Najman
 1.22 - Scoped UUPD to make it unique to my plugins
 1.21 - added language support on the notes display stable

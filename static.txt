@@ -1,8 +1,7 @@
-Install on your dashboard and it will allow you to pull data from Cloudflare for your MainWP reports.
+Install on your dashboard within client sites you will now have a new area to add work notes and you can use them in your reports too.
 == Description ==
 
-Install on your dashboard and it will allow you to pull data from Cloudflare for your MainWP reports.
-
+Install on your dashboard within client sites you will now have a new area to add work notes and you can use them in your reports too.
 == Installation ==
 
 1. Upload the `mainwp-work-notes-proreports-extention` folder to the `/wp-content/plugins/` directory.

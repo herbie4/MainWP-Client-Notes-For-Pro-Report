@@ -2,10 +2,10 @@
 /**
  * Plugin Name:       MainWP Client Notes Pro Report Extension
  * Description:       This adds client notes to your pro report
- * Tested up to:      6.8.1
+ * Tested up to:      6.8.2
  * Requires at least: 6.5
  * Requires PHP:      7.4
- * Version:           1.2.4-beta
+ * Version:           1.2.4
  * Author:            reallyusefulplugins.com
  * Author URI:        https://reallyusefulplugins.com
  * License:           GPL-2.0-or-later
@@ -221,7 +221,7 @@ global $mainwpclientnotesproreportExtensionActivator;
 $mainwpclientnotesproreportExtensionActivator = new MainWP_Client_Pro_Report_Notes_Activator();
 
 // Define plugin constants
-define('RUP_MAINWP_CLIENT_NOTES_VERSION', '1.2.3');
+define('RUP_MAINWP_CLIENT_NOTES_VERSION', '1.2.4');
 
 // ──────────────────────────────────────────────────────────────────────────
 //  Updater bootstrap (plugins_loaded priority 1):
