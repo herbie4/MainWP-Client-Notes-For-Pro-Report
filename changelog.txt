@@ -1,3 +1,7 @@
+1.2.5
+New: Added Support for Preleases
+New: Updated UUPD to 1.3.0
+
 1.2.4 
 - Added support for editing Work Notes using the WordPress visual editor (TinyMCE), enabling rich text formatting.
 - Notes are now stored and displayed with HTML formatting, preserving line breaks, styling, and structure.
