@@ -123,6 +123,17 @@
  *  - Injects WordPress update data via native transients
  *  - Adds “View details” + “Check for updates” under plugin/theme row
  *  - Works seamlessly with `wp_update_plugins()` or `wp_update_themes()`
+ *
+ *
+ * Scoped Filters:
+ *   All filters like `uupd/server_url`, `uupd/remote_url`, etc., also support per-slug filters.
+ *   Example:
+ *      add_filter( 'uupd/server_url/my-plugin-slug', function( $url ) {
+ *          return 'https://mydomain.com/my-endpoint';
+ *      });
+ *
+ *
+ *
  */
 
 namespace RUP\Updater;
@@ -131,7 +142,15 @@ if ( ! class_exists( __NAMESPACE__ . '\Updater_V1' ) ) {
 
     class Updater_V1 {
 
-        const VERSION = '1.2.6'; // Change as needed
+        const VERSION = '1.3.0'; // Change as needed
+
+
+        private static function apply_filters_per_slug( $filter_base, $default, $slug ) {
+            $slug = sanitize_key( $slug );
+            $scoped = apply_filters( "{$filter_base}/{$slug}", $default, $slug );
+            return apply_filters( $filter_base, $scoped, $slug );
+        }
+
 
         /** @var array Configuration settings */
         private $config;
@@ -151,6 +170,26 @@ if ( ! class_exists( __NAMESPACE__ . '\Updater_V1' ) ) {
          * }
          */
         public function __construct( array $config ) {
+             // Allow plugins to override full config dynamically
+            $config = self::apply_filters_per_slug( 'uupd/filter_config', $config, $config['slug'] ?? '' );
+
+            // Allow override of prerelease flag (per-slug logic)
+            $config['allow_prerelease'] = self::apply_filters_per_slug(
+                'uupd/allow_prerelease',
+                $config['allow_prerelease'] ?? false,
+                $config['slug'] ?? ''
+            );
+
+
+            // Allow overriding the server URL
+            $config['server'] = self::apply_filters_per_slug(
+                'uupd/server_url',
+                $config['server'] ?? '',
+                $config['slug'] ?? ''
+            );
+
+
+
             $this->config = $config;
             $this->log( "✓ Using Updater_V1 version " . self::VERSION );
             $this->register_hooks();
@@ -179,9 +218,15 @@ if ( ! class_exists( __NAMESPACE__ . '\Updater_V1' ) ) {
             $url = ( str_ends_with( $c['server'], '.json' ) ? $c['server'] : untrailingslashit( $c['server'] ) )
                 . $separator . "action=get_metadata&slug={$slug}&key={$key}&domain={$host}";
 
+            // Allow full override of constructed URL
+            $url = self::apply_filters_per_slug( 'uupd/remote_url', $url, $c['slug'] );
+
+
             $failure_cache_key = 'rup_' . $c['slug'] . '_error';
 
             $this->log( " Fetching metadata: {$url}" );
+            do_action( 'uupd/before_fetch_remote', $slug, $c );
+            $this->log( "→ Triggered action: uupd/before_fetch_remote for '{$slug}'" );
             $resp = wp_remote_get( $url, [
                 'timeout' => 15,
                 'headers' => [ 'Accept' => 'application/json' ],
@@ -190,9 +235,10 @@ if ( ! class_exists( __NAMESPACE__ . '\Updater_V1' ) ) {
             if ( is_wp_error( $resp ) ) {
                 $msg = $resp->get_error_message();
                 $this->log( " WP_Error: $msg — caching failure for 6 hours" );
-                $ttl = apply_filters( 'urup_fetch_remote_error_ttl', 6 * HOUR_IN_SECONDS, $slug );
+                $ttl = self::apply_filters_per_slug( 'urup_fetch_remote_error_ttl', 6 * HOUR_IN_SECONDS, $slug );
                 set_transient( $failure_cache_key, time(), $ttl );
                 do_action( 'urup_metadata_fetch_failed', [ 'slug' => $c['slug'], 'server' => $c['server'], 'message' => $msg ] );
+                do_action( "urup_metadata_fetch_failed/{$c['slug']}", [ 'slug' => $c['slug'], 'server' => $c['server'], 'message' => $msg ] );
                 return;
             }
 
@@ -203,22 +249,28 @@ if ( ! class_exists( __NAMESPACE__ . '\Updater_V1' ) ) {
 
             if ( 200 !== (int) $code ) {
                 $this->log( "Unexpected HTTP {$code} — update fetch will pause until next cycle" );
-                $ttl = apply_filters( 'urup_fetch_remote_error_ttl', 6 * HOUR_IN_SECONDS, $slug );
+                $ttl = self::apply_filters_per_slug( 'urup_fetch_remote_error_ttl', 6 * HOUR_IN_SECONDS, $slug );
                 set_transient( $failure_cache_key, time(), $ttl );
                 do_action( 'urup_metadata_fetch_failed', [ 'slug' => $c['slug'], 'server' => $c['server'], 'code' => $code ] );
+                do_action( "urup_metadata_fetch_failed/{$c['slug']}", [ 'slug' => $c['slug'], 'server' => $c['server'], 'code' => $code ] );
                 return;
             }
 
             $meta = json_decode( $body );
             if ( ! $meta ) {
                 $this->log( ' JSON decode failed — caching error state' );
-                $ttl = apply_filters( 'urup_fetch_remote_error_ttl', 6 * HOUR_IN_SECONDS, $slug );
+                $ttl = self::apply_filters_per_slug( 'urup_fetch_remote_error_ttl', 6 * HOUR_IN_SECONDS, $slug );
                 set_transient( $failure_cache_key, time(), $ttl );
                 do_action( 'urup_metadata_fetch_failed', [ 'slug' => $c['slug'], 'server' => $c['server'], 'code' => 200, 'message' => 'Invalid JSON' ] );
+                do_action( "urup_metadata_fetch_failed/{$c['slug']}", [ 'slug' => $c['slug'], 'server' => $c['server'], 'code' => 200, 'message' => 'Invalid JSON' ] );
                 return;
             }
 
-            set_transient( 'rup_' . $c['slug'], $meta, 6 * HOUR_IN_SECONDS );
+            // Allow developers to manipulate raw metadata before use
+            $meta = self::apply_filters_per_slug( 'uupd/metadata_result', $meta, $slug );
+
+
+            set_transient( 'rup_' . $c['slug'], $meta, self::apply_filters_per_slug( 'urup_success_cache_ttl', 6 * HOUR_IN_SECONDS, $c['slug'] ) );
             delete_transient( $failure_cache_key );
             $this->log( " Cached metadata '{$c['slug']}' → v" . ( $meta->version ?? 'unknown' ) );
         }
@@ -256,7 +308,7 @@ if ( ! class_exists( __NAMESPACE__ . '\Updater_V1' ) ) {
 
                     if ( false === $release ) {
                         $api_url = str_replace( 'github.com', 'api.github.com/repos', $repo_url ) . '/releases/latest';
-                        $token   = apply_filters( 'uupd/github_token_override', $c['github_token'] ?? '', $slug );
+                        $token = self::apply_filters_per_slug( 'uupd/github_token_override', $c['github_token'] ?? '', $slug );
 
                         $headers = [ 'Accept' => 'application/vnd.github.v3+json' ];
                         if ( $token ) {
@@ -268,14 +320,15 @@ if ( ! class_exists( __NAMESPACE__ . '\Updater_V1' ) ) {
 
                         if ( ! is_wp_error( $response ) && wp_remote_retrieve_response_code( $response ) === 200 ) {
                             $release = json_decode( wp_remote_retrieve_body( $response ) );
-                            $ttl = apply_filters( 'urup_fetch_remote_error_ttl', 6 * hoUR_IN_SECONDS, $slug );
-                            set_transient( $error_key, time(), $ttl );
+                            $ttl = self::apply_filters_per_slug( 'urup_success_cache_ttl', 6 * HOUR_IN_SECONDS, $slug );
+                            set_transient( $cache_key, $release, $ttl );
 
                         } else {
                             $msg = is_wp_error( $response ) ? $response->get_error_message() : 'Invalid HTTP response';
                             $this->log( "✗ GitHub API failed — $msg — caching error state" );
                             set_transient( $error_key, time(), 6 * HOUR_IN_SECONDS );
                             do_action( 'urup_metadata_fetch_failed', [ 'slug' => $slug, 'server' => $repo_url, 'message' => $msg ] );
+                            do_action( "urup_metadata_fetch_failed/{$c['slug']}", [ 'slug' => $slug, 'server' => $repo_url, 'message' => $msg ] );
                             return $trans;
                         }
                     }
@@ -304,7 +357,7 @@ if ( ! class_exists( __NAMESPACE__ . '\Updater_V1' ) ) {
                         ];
                     }
 
-                    set_transient( $cache_id, $meta, apply_filters( 'urup_success_cache_ttl', 6 * HOUR_IN_SECONDS, $slug ) );
+                    $ttl = self::apply_filters_per_slug( 'urup_fetch_remote_error_ttl', 6 * HOUR_IN_SECONDS, $slug );
                     delete_transient( $error_key );
 
                 } else {
@@ -373,6 +426,7 @@ if ( ! class_exists( __NAMESPACE__ . '\Updater_V1' ) ) {
         $slug     = $c['real_slug'] ?? $c['slug'];        // WP expects real theme folder slug
         $cache_id = 'rup_' . $c['slug'];                  // Transient key for metadata
         $error_key = $cache_id . '_error';                // Transient key for error flag
+        $this->log( "Theme-update hook for '{$c['slug']}'" );
         $current  = $trans->checked[ $slug ] ?? wp_get_theme( $slug )->get( 'Version' );
 
         $meta = get_transient( $cache_id );
@@ -404,13 +458,14 @@ if ( ! class_exists( __NAMESPACE__ . '\Updater_V1' ) ) {
 
                     if ( ! is_wp_error( $response ) && wp_remote_retrieve_response_code( $response ) === 200 ) {
                         $release = json_decode( wp_remote_retrieve_body( $response ) );
-                        $ttl = apply_filters( 'urup_fetch_remote_error_ttl', 6 * hoUR_IN_SECONDS, $slug );
-                        set_transient( $error_key, time(), $ttl );
+                        $ttl = self::apply_filters_per_slug( 'urup_success_cache_ttl', 6 * HOUR_IN_SECONDS, $slug );
+                        set_transient( $cache_key, $release, $ttl );
 
                     } else {
                         $this->log( 'GitHub API fetch failed — caching error state' );
                         set_transient( $error_key, time(), 6 * HOUR_IN_SECONDS );
                         do_action( 'urup_metadata_fetch_failed', [ 'slug' => $c['slug'], 'server' => $repo_url, 'message' => 'GitHub fetch failed' ] );
+                        do_action( "urup_metadata_fetch_failed/{$c['slug']}", [ 'slug' => $c['slug'], 'server' => $repo_url, 'message' => 'GitHub fetch failed' ] );
                         return $trans;
                     }
                 }
@@ -431,7 +486,7 @@ if ( ! class_exists( __NAMESPACE__ . '\Updater_V1' ) ) {
                     ];
                 }
 
-                set_transient( $cache_id, $meta, apply_filters( 'urup_success_cache_ttl', 6 * HOUR_IN_SECONDS, $slug ) );
+                $ttl = self::apply_filters_per_slug( 'urup_fetch_remote_error_ttl', 6 * HOUR_IN_SECONDS, $slug );
                 delete_transient( $error_key );
 
             } else {
@@ -566,6 +621,7 @@ if ( ! class_exists( __NAMESPACE__ . '\Updater_V1' ) ) {
         private function log( $msg ) {
             if ( apply_filters( 'updater_enable_debug', false ) ) {
                 error_log( "[Updater] {$msg}" );
+                do_action( 'uupd/log', $msg, $this->config['slug'] ?? '' );
             }
         }
 
@@ -649,6 +705,7 @@ if ( ! class_exists( __NAMESPACE__ . '\Updater_V1' ) ) {
                 $redirect = wp_get_referer() ?: admin_url( 'themes.php' );
             }
 
+            $redirect = self::apply_filters_per_slug( 'uupd/manual_check_redirect', $redirect, $slug );
             wp_safe_redirect( $redirect );
             exit;
         } );

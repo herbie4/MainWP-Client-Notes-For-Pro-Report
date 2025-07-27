@@ -5,7 +5,7 @@
  * Tested up to:      6.8.2
  * Requires at least: 6.5
  * Requires PHP:      7.4
- * Version:           1.2.4
+ * Version:           1.2.5-alpha
  * Author:            reallyusefulplugins.com
  * Author URI:        https://reallyusefulplugins.com
  * License:           GPL-2.0-or-later
@@ -81,8 +81,9 @@ public function load_work_notes_form() {
 
 
     public function admin_init() {
+    	register_setting('mainwp_client_notes_proreport_options_group', 'mainwp_client_notes_proreport_allow_prerelease');
+	}
 
-    }
 
 	public function managesites_subpage( $subPage ) {
     $subPage[] = array(
@@ -99,22 +100,32 @@ public function load_work_notes_form() {
 	* Create your extension page
 	*/
 	public static function renderPage() {
-        global $mainwpclientnotesproreportExtensionActivator;
+    ?>
+    <div class="ui segment">
+        <div class="inside">
+            <form method="post" action="options.php">
+                <?php
+                settings_fields('mainwp_client_notes_proreport_options_group');
+                ?>
+                <h3><?php _e('Update Preferences', 'mainwp-client-notes-pro-reports-extention'); ?></h3>
+                <table class="form-table">
+                    <tr valign="top">
+                        <th scope="row"><?php _e('Enable Pre-Releases', 'mainwp-client-notes-pro-reports-extention'); ?></th>
+                        <td>
+                            <label>
+                                <input type="checkbox" name="mainwp_client_notes_proreport_allow_prerelease" value="yes" <?php checked(get_option('mainwp_client_notes_proreport_allow_prerelease'), 'yes'); ?> />
+                                <?php _e('Allow updates from pre-release versions', 'mainwp-client-notes-pro-reports-extention'); ?>
+                            </label>
+                        </td>
+                    </tr>
+                </table>
+                <?php submit_button(); ?>
+            </form>
+        </div>
+    </div>
+    <?php
+}
 
-        // Ensure the global variable is accessible and initialized
-        if (!$mainwpclientnotesproreportExtensionActivator) {
-            echo 'MainWP Client Notes in Pro Report is not initialized.';
-            return;
-        }
-
-        ?>
-        <div class="ui segment">
-                <div class="inside">
-                    <p><?php _e('There is nothing to set in here, this is used for debug only'); ?></p>
-                </div>
-            </div>
-        <?php
-    }
 
     /**
 	 * Method settings().
@@ -221,7 +232,7 @@ global $mainwpclientnotesproreportExtensionActivator;
 $mainwpclientnotesproreportExtensionActivator = new MainWP_Client_Pro_Report_Notes_Activator();
 
 // Define plugin constants
-define('RUP_MAINWP_CLIENT_NOTES_VERSION', '1.2.4');
+define('RUP_MAINWP_CLIENT_NOTES_VERSION', '1.2.5-alpha');
 
 // ──────────────────────────────────────────────────────────────────────────
 //  Updater bootstrap (plugins_loaded priority 1):
@@ -243,4 +254,8 @@ add_action( 'plugins_loaded', function() {
 
     // 3) Call the helper in the UUPD\V1 namespace:
     \RUP\Updater\Updater_V1::register( $updater_config );
-}, 1 );
+}, 20 );
+
+add_filter('uupd/allow_prerelease/mainwp-client-notes-pro-reports-extention', function ($allow) {
+    return get_option('mainwp_client_notes_proreport_allow_prerelease') === 'yes';
+}, 5);
