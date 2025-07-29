@@ -1,40 +1,39 @@
-
-jQuery(document).ready(function($) {
-
-    // Function to correct rendering of date picker field
+jQuery(document).ready(function ($) {
     function fixDatePicker() {
         var dateInput = $('input[name="work_notes_date"]');
         dateInput.focus();
         dateInput.blur();
     }
 
-    // Bind all event handlers (edit, delete) for dynamic content
+    function renderNoteRow(index, note) {
+        return `
+            <tr data-note-id="${index}">
+                <td>${note.date}</td>
+                <td>${note.content}</td>
+                <td>
+                    <button class="ui button blue edit-note" data-note-id="${index}">Edit</button>
+                    <button class="ui button red delete-note" data-note-id="${index}">Delete</button>
+                </td>
+            </tr>`;
+    }
+
     function bindWorkNotesEvents() {
+        $(document).off('click', '.edit-note').on('click', '.edit-note', function () {
+            const noteId = $(this).data('note-id');
+            const wpid = $('input[name="wpid"]').val();
 
-        // Handle editing an existing note
-        $(document).on('click', '.edit-note', function () {
-            console.log("Setting note_id to", noteId);
-            console.log("note_id input exists?", $('input[name="note_id"]').length);
-
-            var noteId = $(this).data('note-id');
-            var wpid = $('input[name="wpid"]').val();
-
-            var data = {
+            $.post(mainwpWorkNotes.ajax_url, {
                 action: 'load_work_note',
                 nonce: mainwpWorkNotes.nonce,
                 wpid: wpid,
                 note_id: noteId
-            };
-
-            $.post(mainwpWorkNotes.ajax_url, data, function (response) {
+            }, function (response) {
                 if (response.success) {
-                    // Populate form with existing note data
                     $('input[name="note_id"]').val(noteId);
                     $('input[name="work_notes_date"]').val(response.data.date);
 
-                    // Set TinyMCE content or fallback to textarea
-                    var editor = tinyMCE.get('work_notes_content');
-                    if (editor && editor instanceof tinymce.Editor) {
+                    const editor = tinyMCE.get('work_notes_content');
+                    if (editor) {
                         editor.setContent(response.data.content);
                     } else {
                         $('textarea[name="work_notes_content"]').val(response.data.content);
@@ -47,22 +46,22 @@ jQuery(document).ready(function($) {
             });
         });
 
-        // Handle deleting a note
-        $('.delete-note').on('click', function () {
-            var noteId = $(this).data('note-id');
-            var wpid = $('input[name="wpid"]').val();
+        $(document).off('click', '.delete-note').on('click', '.delete-note', function () {
+            if (!confirm('Are you sure you want to delete this note?')) return;
 
-            var data = {
+            const noteId = $(this).data('note-id');
+            const wpid = $('input[name="wpid"]').val();
+
+            $.post(mainwpWorkNotes.ajax_url, {
                 action: 'delete_work_note',
                 nonce: mainwpWorkNotes.nonce,
                 wpid: wpid,
                 note_id: noteId
-            };
-
-            $.post(mainwpWorkNotes.ajax_url, data, function (response) {
+            }, function (response) {
                 if (response.success) {
-                    alert('Note deleted successfully!');
-                    location.reload();
+                    alert(response.data.message);
+                    reloadNotesTable(wpid);
+                    resetForm();
                 } else {
                     alert(response.data.message);
                 }
@@ -70,51 +69,57 @@ jQuery(document).ready(function($) {
         });
     }
 
-    // Initialize all field behaviors on first load
-    fixDatePicker();
-    bindWorkNotesEvents();
-    console.log("V1.01");
+    function reloadNotesTable(wpid) {
+        $.post(mainwpWorkNotes.ajax_url, {
+            action: 'load_work_notes_form',
+            nonce: mainwpWorkNotes.nonce,
+            site_id: wpid
+        }, function (response) {
+            console.log("Reload AJAX response:", response);
+            if (response.success && response.data && response.data.html) {
+                $('.ui.celled.table tbody').replaceWith(response.data.html);
+                bindWorkNotesEvents(); // Re-bind handlers
+            } else {
+                alert(response.data?.message || 'Failed to reload notes.');
+            }
+        });
+    }
 
-    // Handle saving the note (new or edited)
+
+    function resetForm() {
+        $('input[name="note_id"]').val('-1'); // ensure new notes work
+        $('input[name="work_notes_date"]').val('');
+        const editor = tinyMCE.get('work_notes_content');
+        if (editor) {
+            editor.setContent('');
+        }
+        $('textarea[name="work_notes_content"]').val('');
+        fixDatePicker();
+    }
+
     $('#save-work-note').on('click', function () {
-        var data = {
+        const noteId = $('input[name="note_id"]').val();
+        const wpid = $('input[name="wpid"]').val();
+        const content = tinyMCE.get('work_notes_content')?.getContent() || $('textarea[name="work_notes_content"]').val();
+
+        $.post(mainwpWorkNotes.ajax_url, {
             action: 'save_work_note',
             nonce: mainwpWorkNotes.nonce,
-            wpid: $('input[name="wpid"]').val(),
-            note_id: $('input[name="note_id"]').val(),  // This must be set properly when editing
+            wpid: wpid,
+            note_id: noteId,
             work_notes_date: $('input[name="work_notes_date"]').val(),
-            work_notes_content: tinyMCE.get('work_notes_content') ? tinyMCE.get('work_notes_content').getContent() : $('textarea[name="work_notes_content"]').val()
-        };
-
-        console.log("Submitting note ID:", data.note_id);  // Debugging output
-
-        $.post(mainwpWorkNotes.ajax_url, data, function (response) {
+            work_notes_content: content
+        }, function (response) {
             if (response.success) {
-                alert('Note saved successfully!');
-                location.reload();
+                alert(response.data.message);
+                reloadNotesTable(wpid);
+                resetForm();
             } else {
                 alert(response.data.message);
             }
         });
     });
 
-    // Rebind events after AJAX loads the notes tab
-    $('#mainwp_tab_WorkNotes').on('click', function (e) {
-        e.preventDefault();
-        var siteId = $(this).data('siteid');
-
-        $.ajax({
-            url: ajaxurl,
-            type: 'POST',
-            data: {
-                action: 'load_work_notes_form',
-                site_id: siteId
-            },
-            success: function (response) {
-                $('#mainwp_tab_WorkNotes_container').html(response);
-                bindWorkNotesEvents();  // Rebind after DOM replacement
-            }
-        });
-    });
-
+    fixDatePicker();
+    bindWorkNotesEvents();
 });

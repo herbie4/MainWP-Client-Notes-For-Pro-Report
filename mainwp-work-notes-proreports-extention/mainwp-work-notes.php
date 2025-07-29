@@ -15,6 +15,8 @@ class MainWP_Work_Notes {
         add_action('wp_ajax_save_work_note', array(__CLASS__, 'ajax_save_work_note_action'));
         add_action('wp_ajax_delete_work_note', array(__CLASS__, 'ajax_delete_work_note_action'));
         add_action('wp_ajax_load_work_note', array(__CLASS__, 'ajax_load_work_note_action'));
+        add_action('wp_ajax_load_work_notes_form', array(__CLASS__, 'ajax_load_work_notes_form'));
+
     }
 
     // Load WordPress editor and custom JavaScript
@@ -42,38 +44,122 @@ class MainWP_Work_Notes {
 
     // Handle saving or updating a work note
     public static function ajax_save_work_note_action() {
-        check_ajax_referer('work_notes_nonce', 'nonce');
+    check_ajax_referer('work_notes_nonce', 'nonce');
 
-        if (!current_user_can('manage_options')) {
-            wp_send_json_error(array('message' => 'Insufficient permissions.'));
+    if (!current_user_can('manage_options')) {
+        wp_send_json_error(['message' => 'Insufficient permissions.']);
+    }
+
+    $_POST = stripslashes_deep($_POST);
+    $current_wpid = isset($_POST['wpid']) ? intval($_POST['wpid']) : 0;
+    $note_id = isset($_POST['note_id']) ? intval($_POST['note_id']) : -1;
+
+    if (!$current_wpid) {
+        wp_send_json_error(['message' => 'Invalid site ID.']);
+    }
+
+    $work_date = sanitize_text_field($_POST['work_notes_date']);
+    $work_content = wp_kses_post($_POST['work_notes_content']);
+
+    $notes_key = 'mainwp_work_notes_' . $current_wpid;
+    $notes = get_option($notes_key, []);
+
+    if ($note_id >= 0 && isset($notes[$note_id])) {
+        $notes[$note_id]['date'] = $work_date;
+        $notes[$note_id]['content'] = $work_content;
+    } else {
+        $notes[] = [
+            'date' => $work_date,
+            'content' => $work_content,
+            'timestamp' => current_time('timestamp'),
+        ];
+        $note_id = array_key_last($notes);
+    }
+
+    update_option($notes_key, $notes);
+
+    wp_send_json_success([
+        'message' => 'Note saved successfully.',
+        'note_id' => $note_id
+    ]);
+}
+
+
+
+        public static function render_notes_table() {
+        $site_id = isset($_POST['site_id']) ? intval($_POST['site_id']) : 0;
+        if (!$site_id) {
+            wp_send_json_error(['message' => 'Invalid site ID']);
         }
 
-        $current_wpid = isset($_POST['wpid']) ? intval($_POST['wpid']) : 0;
-        $note_id = isset($_POST['note_id']) ? intval($_POST['note_id']) : 0;
-
-        if (!$current_wpid) {
-            wp_send_json_error(array('message' => 'Invalid site ID.'));
-        }
-
-        $work_date = sanitize_text_field($_POST['work_notes_date']);
-        $work_content = wp_kses_post($_POST['work_notes_content']); // Allow safe HTML
-
-        $notes_key = 'mainwp_work_notes_' . $current_wpid;
+        $notes_key = 'mainwp_work_notes_' . $site_id;
         $notes = get_option($notes_key, array());
 
-        if (isset($notes[$note_id])) {
-            // Update existing note
-            $notes[$note_id]['date'] = $work_date;
-            $notes[$note_id]['content'] = $work_content;
-        } else {
-            // Save new note
-            $notes[] = array('date' => $work_date, 'content' => $work_content, 'timestamp' => current_time('timestamp'));
-        }
-
-
-        update_option($notes_key, $notes);
-        wp_send_json_success(array('message' => 'Note saved successfully.'));
+        ob_start(); ?>
+        <table class="ui celled table">
+            <thead><tr><th>Date</th><th>Details</th><th>Actions</th></tr></thead>
+            <tbody>
+            <?php foreach ($notes as $index => $note) : ?>
+                <tr data-note-id="<?php echo esc_attr($index); ?>">
+                    <td><?php echo esc_html($note['date']); ?></td>
+                    <td><?php echo wp_kses_post($note['content']); ?></td>
+                    <td>
+                        <button class="ui button blue edit-note" data-note-id="<?php echo esc_attr($index); ?>">Edit</button>
+                        <button class="ui button red delete-note" data-note-id="<?php echo esc_attr($index); ?>">Delete</button>
+                    </td>
+                </tr>
+            <?php endforeach; ?>
+            </tbody>
+        </table>
+        <?php
+        echo ob_get_clean();
+        wp_die();
     }
+
+
+        public static function ajax_load_work_notes_form() {
+    error_log('AJAX: load_work_notes_form hit');
+
+    check_ajax_referer('work_notes_nonce', 'nonce');
+
+    if (!current_user_can('manage_options')) {
+        wp_send_json_error(['message' => 'Insufficient permissions']);
+    }
+
+    $site_id = isset($_POST['site_id']) ? intval($_POST['site_id']) : 0;
+    if (!$site_id) {
+        wp_send_json_error(['message' => 'Invalid site ID']);
+    }
+
+    $notes_key = 'mainwp_work_notes_' . $site_id;
+    $notes = get_option($notes_key, array());
+
+    ob_start();
+    echo '<tbody>'; // FIX: wrap the rows in <tbody>
+    foreach ($notes as $index => $note) {
+        echo '<tr data-note-id="' . esc_attr($index) . '">';
+        echo '<td>' . esc_html($note['date']) . '</td>';
+        echo '<td>' . wp_kses_post($note['content']) . '</td>';
+        echo '<td>
+                <button class="ui button blue edit-note" data-note-id="' . esc_attr($index) . '">Edit</button>
+                <button class="ui button red delete-note" data-note-id="' . esc_attr($index) . '">Delete</button>
+              </td>';
+        echo '</tr>';
+    }
+    echo '</tbody>';
+    $html = ob_get_clean();
+
+    wp_send_json_success(['html' => $html]);
+}
+
+
+
+
+
+        
+
+
+
 
     // Handle retrieving a note for editing
     public static function ajax_load_work_note_action() {
@@ -103,30 +189,32 @@ class MainWP_Work_Notes {
 
     // Handle deleting a work note
     public static function ajax_delete_work_note_action() {
-        check_ajax_referer('work_notes_nonce', 'nonce');
+    check_ajax_referer('work_notes_nonce', 'nonce');
 
-        if (!current_user_can('manage_options')) {
-            wp_send_json_error(array('message' => 'Insufficient permissions.'));
-        }
-
-        $current_wpid = isset($_POST['wpid']) ? intval($_POST['wpid']) : 0;
-        $note_id = isset($_POST['note_id']) ? intval($_POST['note_id']) : false;
-
-        if (!$current_wpid || $note_id === false) {
-            wp_send_json_error(array('message' => 'Invalid site ID or note ID.'));
-        }
-
-        $notes_key = 'mainwp_work_notes_' . $current_wpid;
-        $notes = get_option($notes_key, array());
-
-        if (isset($notes[$note_id])) {
-            unset($notes[$note_id]);
-            update_option($notes_key, $notes);
-            wp_send_json_success(array('message' => 'Note deleted successfully.'));
-        } else {
-            wp_send_json_error(array('message' => 'Note not found.'));
-        }
+    if (!current_user_can('manage_options')) {
+        wp_send_json_error(array('message' => 'Insufficient permissions.'));
     }
+
+    $current_wpid = isset($_POST['wpid']) ? intval($_POST['wpid']) : 0;
+    $note_id = isset($_POST['note_id']) ? intval($_POST['note_id']) : -1;
+
+    if (!$current_wpid || $note_id < 0) {
+        wp_send_json_error(array('message' => 'Invalid site ID or note ID.'));
+    }
+
+    $notes_key = 'mainwp_work_notes_' . $current_wpid;
+    $notes = get_option($notes_key, array());
+
+    if (isset($notes[$note_id])) {
+        unset($notes[$note_id]);
+        $notes = array_values($notes); // Re-Index
+        update_option($notes_key, $notes);
+        wp_send_json_success(array('message' => 'Note deleted successfully.'));
+    } else {
+        wp_send_json_error(array('message' => 'Note not found.'));
+    }
+}
+
 
     // Render the UI for Work Notes tab
     public static function render() {
@@ -141,16 +229,17 @@ class MainWP_Work_Notes {
         echo '<div id="mainwp_tab_WorkNotes_container" class="ui segment">';
 
         // Work Notes form
+		echo '<div class="mainwp-work-note-message" style="display:none;"></div>';
         echo '<form id="work-notes-form" class="ui form" style="padding: 20px; max-width: 95%; margin: 0 auto;">';
         echo '<input type="hidden" name="wpid" value="' . esc_attr($current_wpid) . '">';
-        echo '<input type="hidden" name="note_id" value="0">';
+        echo '<input type="hidden" name="note_id" value="-1">';
         echo '<div class="field"><label for="work_notes_date">Work Date:</label><input type="date" name="work_notes_date" required style="width: 100%;"></div>';
         echo '<div class="field"><label for="work_notes_content">Work Details:</label>';
         ob_start();
         wp_editor('', 'work_notes_content', array(
             'textarea_name' => 'work_notes_content',
             'textarea_rows' => 10,
-            'media_buttons' => false,
+            'media_buttons' => true,
             'tinymce'       => true,
             'quicktags'     => true,
         ));
