@@ -232,7 +232,7 @@ global $mainwpclientnotesproreportExtensionActivator;
 $mainwpclientnotesproreportExtensionActivator = new MainWP_Client_Pro_Report_Notes_Activator();
 
 // Define plugin constants
-define('RUP_MAINWP_CLIENT_NOTES_VERSION', '1.2.5-beta.2');
+define('RUP_MAINWP_CLIENT_NOTES_VERSION', '1.2.5-beta.3');
 
 // ──────────────────────────────────────────────────────────────────────────
 //  Updater bootstrap (plugins_loaded priority 1):
